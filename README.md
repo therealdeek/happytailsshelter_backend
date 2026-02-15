@@ -1,5 +1,9 @@
 # Happy Tails Shelter Backend
 
+Team Members: 
+
+Jim Liriano
+
 ## Prerequisites
 
 - Prisma requires node.js versions 20.19+, 22.12+ or 24.0+
