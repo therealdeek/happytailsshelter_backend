@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model animal {
+  animal_id          Int                  @id @default(autoincrement())
+  microchip          String?              @unique @db.VarChar(15)
+  name               String               @db.VarChar(100)
+  date_of_birth      DateTime?            @db.Date
+  gender             String?              @db.VarChar(10)
+  color              String?              @db.VarChar(50)
+  breed              String?              @db.VarChar(50)
+  species            String               @db.VarChar(50)
+  weight             Decimal?             @db.Decimal(5, 2)
+  status             String               @db.VarChar(20)
+  description        String?
+  photo_url          String?
+  created_at         DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamp(6)
+  foster_history     foster_history[]
+  inventory_checkout inventory_checkout[]
+  medical_log        medical_log[]
+}
+
+model foster_history {
+  foster_history_id                  Int       @id @default(autoincrement())
+  animal_id                          Int
+  user_id                            Int
+  start_date                         DateTime? @default(now()) @db.Timestamp(6)
+  end_date                           DateTime? @db.Timestamp(6)
+  staff_id                           Int
+  animal                             animal    @relation(fields: [animal_id], references: [animal_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal")
+  user_foster_history_staff_idTouser user      @relation("foster_history_staff_idTouser", fields: [staff_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_staff")
+  user_foster_history_user_idTouser  user      @relation("foster_history_user_idTouser", fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+}
+
+model inventory_checkout {
+  checkout_id       Int            @id @default(autoincrement())
+  animal_id         Int?
+  checkout_date     DateTime?      @db.Date
+  return_date       DateTime?      @db.Date
+  quantity          Int?
+  inventory_item_id Int
+  user_id           Int?
+  animal            animal?        @relation(fields: [animal_id], references: [animal_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal")
+  inventory_item    inventory_item @relation(fields: [inventory_item_id], references: [inventory_item_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_inventory")
+  user              user?          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+}
+
+model inventory_item {
+  inventory_item_id  Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(250)
+  type               String               @db.VarChar(250)
+  quantity           Int?
+  cost               Int?
+  lastupdated        DateTime?            @default(now()) @db.Timestamp(6)
+  inventory_checkout inventory_checkout[]
+}
+
+model medical_log {
+  log_history_id Int       @id @default(autoincrement())
+  animal_id      Int
+  type           Int?
+  created_date   DateTime  @db.Date
+  user_id        Int
+  description    String?   @db.VarChar(250)
+  start_date     DateTime? @db.Date
+  end_date       DateTime? @db.Date
+  animal         animal    @relation(fields: [animal_id], references: [animal_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_animal")
+  user           user      @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user {
+  user_id                                      Int                 @id @default(autoincrement())
+  first_name                                   String               @db.VarChar
+  last_name                                    String?              @db.VarChar
+  email                                        String               @unique @db.VarChar
+  role                                         Int                  @db.SmallInt
+  phone_number                                 String?              @db.VarChar
+  status                                       String               @default("'A'") @db.VarChar
+  created_at                                   DateTime?            @default(now()) @db.Timestamp(6)
+  foster_history_foster_history_staff_idTouser foster_history[]     @relation("foster_history_staff_idTouser")
+  foster_history_foster_history_user_idTouser  foster_history[]     @relation("foster_history_user_idTouser")
+  inventory_checkout                           inventory_checkout[]
+  medical_log                                  medical_log[]
+}
