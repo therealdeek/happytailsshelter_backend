@@ -14,13 +14,20 @@ export async function getFosterHistoryByAnimalId(id: number) {
     where: { animal_id: id },
   });
 }
-export async function getFosterHistoryByUserId(id: number) {
-  const safeId = Number(id);
-  if (isNaN(safeId)) {
-    throw new Error("Invalid user ID");
-  }
-  const fosterHistory = await prisma.$queryRaw`select*from foster_history Left join animal on foster_history.animal_id = animal.animal_id where foster_history.user_id=${safeId} order by animal.name`;
+
+export async function getFosterHistoryByUserd(id: number) {
+  return prisma.foster_history.findUnique({
+    where: { foster_history_id: id}
+  });
 }
+
+// export async function getFosterHistoryByUserId(id: number) {
+//   const safeId = Number(id);
+//   if (isNaN(safeId)) {
+//     throw new Error("Invalid user ID");
+//   }
+//   const fosterHistory = await prisma.$queryRaw`select*from foster_history Left join animal on foster_history.animal_id = animal.animal_id where foster_history.user_id=${safeId} order by animal.name`;
+// }
 
 export async function createFosterHistoryRecord(data: any) {
   return prisma.foster_history.create({
